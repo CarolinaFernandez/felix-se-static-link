@@ -1,0 +1,44 @@
+###################
+#Create Controller
+#IP = 10.216.65.128
+###################
+
+# Create slice
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 createslice "testSEi2CATPSNCCtrl" "2017-01-01T00:00:00+01:00" --cred ~/.gcf/omni-cred.xml --debug -o --slicecredfile ~/.gcf/testSEi2CATPSNCCtrl-cred.json
+
+# Allocate
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 -a https://127.0.0.1:18440/xmlrpc/geni/3/ allocate testSEi2CATPSNCCtrl /home/i2cat/omni/test/static_vlan/se_test_ctrl.rspec --slicecredfile ~/.gcf/testSEi2CATPSNCCtrl-cred.json
+
+# Provision
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 -a https://127.0.0.1:18440/xmlrpc/geni/3/ provision testSEi2CATPSNCCtrl --slicecredfile ~/.gcf/testSEi2CATPSNCCtrl-cred.json
+
+# Delete
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 -a https://127.0.0.1:18440/xmlrpc/geni/3/ delete testSEi2CATPSNCCtrl --slicecredfile ~/.gcf/testSEi2CATPSNCCtrl-cred.json
+
+
+#######################
+#Define Network and EPs
+#######################
+
+# Create slice
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 createslice "testSEi2CATPSNC" "2017-01-01T00:00:00+01:00" --cred ~/.gcf/omni-cred.xml --debug -o --slicecredfile ~/.gcf/testSEi2CATPSNC-cred.json
+
+# Allocate
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 -a https://127.0.0.1:18440/xmlrpc/geni/3/ allocate testSEi2CATPSNC /home/i2cat/omni/test/static_vlan/se_test.rspec --slicecredfile ~/.gcf/testSEi2CATPSNC-cred.json
+
+# Provision
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 -a https://127.0.0.1:18440/xmlrpc/geni/3/ provision testSEi2CATPSNC --slicecredfile ~/.gcf/testSEi2CATPSNC-cred.json
+
+# Start
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 -a https://127.0.0.1:18440/xmlrpc/geni/3/ poa testSEi2CATPSNC geni_start --slicecredfile ~/.gcf/testSEi2CATPSNC-cred.json
+
+# Delete
+python /opt/geni/geni-tools/src/omni.py -f my_cbas -V3 -a https://127.0.0.1:18440/xmlrpc/geni/3/ delete testSEi2CATPSNC --slicecredfile ~/.gcf/testSEi2CATPSNC-cred.json
+
+
+################
+# Run Controller
+################
+
+python pox.py forwarding.l2_ping --vlan=3100 --proactive
+python pox.py forwarding.l2_ping --vlan=3100

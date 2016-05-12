@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rspec  type="request"
+        xs:schemaLocation="http://www.geni.net/resources/rspec/3
+                           http://hpn.east.isi.edu/rspec/ext/stitch/0.1/
+                           http://hpn.east.isi.edu/rspec/ext/stitch/0.1/stitch-schema.xsd
+                           http://www.geni.net/resources/rspec/3/request.xsd"
+        xmlns="http://www.geni.net/resources/rspec/3"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:openflow="http://www.geni.net/resources/rspec/ext/openflow/3"
+        xmlns:felix="http://ict-felix.eu/serm_request"
+        xmlns:sharedvlan="http://www.geni.net/resources/rspec/ext/shared-vlan/1"
+        xmlns:stitch="http://hpn.east.isi.edu/rspec/ext/stitch/0.1/"
+        xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1">
+
+  <!-- CRM -->
+  <node client_id="VerdaguerSETest" component_id="urn:publicid:IDN+ocf:i2cat:vtam+node+Verdaguer" component_manager_id="urn:publicid:IDN+ocf:i2cat:vtam+authority+cm" exclusive="true">
+      <sliver_type name="emulab-xen">
+        <emulab:xen cores="3" ram="512" disk="10"/>
+        <disk_image name="urn:publicid:IDN+wall2.ilabt.iminds.be+image+emulab-ops//DEB60_64-VLAN"/>
+     </sliver_type>
+  </node>
+  <node client_id="IBM2SETest" 
+        component_id="urn:publicid:IDN+ocf:psnc:vtam+node+psnc-ibm2" 
+        component_manager_id="urn:publicid:IDN+ocf:psnc:vtam+authority+cm" 
+        exclusive="true">
+      <sliver_type name="emulab-xen">
+        <location xmlns="http://jfed.iminds.be/rspec/ext/jfed/1" x="202.0" y="209.5"/>
+        <emulab:xen cores="1" ram="512" disk="10"/>
+        <disk_image name="/mnt/l1vm/template/l1vm.qcow2"/>
+      </sliver_type>
+  </node>
+
+  <!-- SDNRM -->
+    <openflow:sliver email="carolina.fernandez@i2cat.net" description="OF-request for i2CAT island">
+        <openflow:controller url="tcp:10.216.65.128:6633" type="primary"/>
+
+        <openflow:group name="i2CAT">
+            <openflow:datapath component_id="urn:publicid:IDN+openflow:ocf:i2cat:ofam+datapath+00:10:00:00:00:00:00:01"
+                               component_manager_id="urn:publicid:IDN+openflow:ocf:i2cat:ofam+authority+cm"
+                               dpid="00:10:00:00:00:00:00:01">
+                <openflow:port name="GBE0/6" num="6"/>
+                <openflow:port name="GBE0/12" num="12"/>
+            </openflow:datapath>
+        </openflow:group>
+        <openflow:match>
+            <openflow:use-group name="i2CAT"/>
+            <openflow:packet>
+                <openflow:dl_vlan value="3100" />
+            </openflow:packet>
+        </openflow:match>
+    </openflow:sliver>
+  <openflow:sliver email="carolina.fernandez@i2cat.net" description="OF-request for PSNC island">
+    <openflow:controller url="tcp:10.216.65.128:6633" type="primary"/>
+    <openflow:group name="PSNC">
+      <openflow:datapath component_id="urn:publicid:IDN+openflow:ocf:psnc:ofam+datapath+00:00:08:81:f4:88:f5:b0"
+                         component_manager_id="urn:publicid:IDN+openflow:ocf:psnc:ofam+authority+cm"
+                         dpid="00:00:08:81:f4:88:f5:b0">
+        <openflow:port name="ge-1/1/2.0" num="12"/>
+        <openflow:port name="ge-1/1/6.0" num="16"/>
+      </openflow:datapath>
+    </openflow:group>
+    <openflow:match>
+      <openflow:use-group name="PSNC"/>
+      <openflow:packet>
+        <openflow:dl_vlan value="3100" /> <!-- Custom VLAN only in IBM2, as it is tagged inside -->
+      </openflow:packet>
+    </openflow:match>
+  </openflow:sliver>
+
+  <!-- SERM -->
+  <node client_id="urn:publicid:IDN+fms:i2cat:serm+datapath+10:00:78:ac:c0:15:19:c0"
+          component_manager_id="urn:publicid:IDN+fms:i2cat:serm+authority+cm">
+    <interface client_id="urn:publicid:IDN+fms:i2cat:serm+datapath+10:00:78:ac:c0:15:19:c0_21"/>
+    <interface client_id="urn:publicid:IDN+fms:i2cat:serm+datapath+10:00:78:ac:c0:15:19:c0_1"/>
+  </node>
+  <link client_id="urn:publicid:IDN+fms:i2cat:serm+datapath+10:00:78:ac:c0:15:19:c0_21?vlan=0-10:00:78:ac:c0:15:19:c0_1?vlan=3100">
+    <component_manager name="urn:publicid:IDN+fms:i2cat:serm+authority+cm"/>
+    <link_type name="urn:felix+vlan_trans"/>
+    <interface_ref client_id="urn:publicid:IDN+fms:i2cat:serm+datapath+10:00:78:ac:c0:15:19:c0_21"/>
+    <interface_ref client_id="urn:publicid:IDN+fms:i2cat:serm+datapath+10:00:78:ac:c0:15:19:c0_1"/>
+  </link>
+  <node client_id="urn:publicid:IDN+fms:psnc:serm+datapath+00:00:54:e0:32:cc:a4:c0"
+          component_manager_id="urn:publicid:IDN+fms:psnc:serm+authority+cm">
+    <interface client_id="urn:publicid:IDN+fms:psnc:serm+datapath+00:00:54:e0:32:cc:a4:c0_4"/>
+    <interface client_id="urn:publicid:IDN+fms:psnc:serm+datapath+00:00:54:e0:32:cc:a4:c0_2"/>
+  </node>
+  <link client_id="urn:publicid:IDN+fms:psnc:serm+datapath+00:00:54:e0:32:cc:a4:c0_4?vlan=0-00:00:54:e0:32:cc:a4:c0_2?vlan=3100">
+    <component_manager name="urn:publicid:IDN+fms:psnc:serm+authority+cm"/>
+    <link_type name="urn:felix+vlan_trans"/>
+    <interface_ref client_id="urn:publicid:IDN+fms:psnc:serm+datapath+00:00:54:e0:32:cc:a4:c0_4"/>
+    <interface_ref client_id="urn:publicid:IDN+fms:psnc:serm+datapath+00:00:54:e0:32:cc:a4:c0_2"/>
+  </link>
+</rspec>
